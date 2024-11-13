@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import AppointmentBooking from './pages/AppointmentBooking';
 import Navbar from './components/Navbar';
 import './index.css'; // Ensure Tailwind CSS is correctly configured.
+import './/output.css';
 
 const App = () => {
   return (
