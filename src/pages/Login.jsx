@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,373 +8,93 @@ const Login = () => {
     password: '',
   });
 
-  const navigate = useNavigate();
+  const navigate = useNavigate();  // Initialize the navigate function
 
-  // 📝 Handles input change
+  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // 📤 Handles form submission
+  // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    // 🛠️ Validate form inputs
-    if (!formData.email || !formData.password) {
-      alert('⚠️ Please enter both email and password.');
-      return;
-    }
-
     try {
-      console.log('🔗 API Base URL:', import.meta.env.VITE_API_BASE_URL);
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/login`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
+      // Send POST request to login the user
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/login`, formData, {
+        headers: {
+          'Content-Type': 'application/json',  // Ensure correct content type
+        },
+      });
       alert('✅ Login successful!');
-      console.log('Login Response:', response.data);
+      console.log('User Logged In:', response.data);
 
-      // 🛠️ Check if the token is available in the response
-      if (response.data && response.data.token) {
-        localStorage.setItem('authToken', response.data.token); // 🎉 Store the token in local storage
-      } else {
-        console.warn('⚠️ Token not found.');
-      }
-
-      // 🔀 Navigate to the dashboard
-      navigate('/dashboard');
+      // Navigate to the dashboard page after successful login
+      navigate('/dashboard');  // Redirects the user to the dashboard page
     } catch (error) {
-      console.error('❌ Full error:', error);
-
-      // 🛠️ Check for errors in the response
-      if (error.response) {
-        console.error('❌ Server Response:', error.response.data);
-        alert(`⚠️ ${error.response.data.message || 'Login failed. Please try again.'}`);
+      console.error('❌ Error logging in:', error);
+      // Check for specific error message from the server
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(`⚠️ ${error.response.data.message}`);
       } else if (error.request) {
-        console.error('❌ No response received:', error.request);
-        alert('❌ Network error: Please check your internet connection.');
+        alert('❌ Network Error: Please check your internet connection or try again later.');
       } else {
-        console.error('❌ Setup error:', error.message);
-        alert('❌ An error occurred while logging in.');
+        alert('❌ Login failed. Please try again.');
       }
     }
   };
 
   return (
-    <div className="p-8">
-      <h2 className="mb-4 font-bold text-2xl">Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="mb-4 p-2 border w-full"
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="mb-4 p-2 border w-full"
-        />
-        <button type="submit" className="bg-blue-500 px-4 py-2 rounded text-white">
-          Login
-        </button>
-      </form>
+    <div className="flex justify-center items-center bg-gradient-to-br from-blue-50 to-blue-100 p-8 min-h-screen">
+      <div className="bg-white bg-opacity-90 shadow-2xl p-14 rounded-3xl w-full max-w-md">
+        <h2 className="drop-shadow-lg mb-6 font-extrabold text-4xl text-blue-900 text-center leading-tight">
+          Login to Your Account
+        </h2>
+        <form onSubmit={handleLogin}>
+          <div className="mb-6">
+            <label htmlFor="email" className="block mb-2 font-semibold text-gray-700 text-lg">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              className="border-gray-300 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 w-full focus:outline-none"
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label htmlFor="password" className="block mb-2 font-semibold text-gray-700 text-lg">Password</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              value={formData.password}
+              onChange={handleChange}
+              className="border-gray-300 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 w-full focus:outline-none"
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg focus:ring-4 focus:ring-blue-300 w-full font-bold text-white transform transition-all hover:scale-105 focus:outline-none">
+            Login
+          </button>
+        </form>
+        
+        <p className="mt-6 text-center text-gray-600">
+          Don't have an account? 
+          <button 
+            onClick={() => navigate('/register')} 
+            className="font-bold text-blue-500 hover:underline">
+            Register Here
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
 
 export default Login;
-
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-
-// const Login = () => {
-//   const [formData, setFormData] = useState({
-//     email: '',
-//     password: '',
-//   });
-
-//   const navigate = useNavigate();
-
-//   // Handle input change
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   // Handle form submission for login
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-
-//     // Check if both fields are filled
-//     if (!formData.email || !formData.password) {
-//       alert('⚠️ Please enter your email and password.');
-//       return;
-//     }
-
-//     try {
-//       // Log the API URL to ensure it's correct
-//       console.log('API Base URL:', import.meta.env.VITE_API_BASE_URL);
-
-//       // Make the API request
-//       const response = await axios.post(
-//         `${import.meta.env.VITE_API_BASE_URL}/login`, // Ensure the API base URL is correct
-//         formData,
-//         {
-//           headers: {
-//             'Content-Type': 'application/json',
-//           },
-//         }
-//       );
-
-//       alert('✅ Login successful!');
-//       console.log('Login Response:', response.data);
-
-//       // Check if the token is returned and store it
-//       if (response.data && response.data.token) {
-//         localStorage.setItem('authToken', response.data.token); // Store the token in localStorage
-//       } else {
-//         console.warn('⚠️ No token received in response');
-//       }
-
-//       // Redirect to the dashboard or another page
-//       navigate('/dashboard');
-
-//     } catch (error) {
-//       console.error('❌ Full Error Object:', error); // Full error log for debugging
-      
-//       if (error.response) {
-//         console.error('❌ Response Data:', error.response.data); // Server error (like validation, auth issues)
-//         alert(`⚠️ ${error.response.data.message || 'Login failed. Please try again.'}`);
-//       } else if (error.request) {
-//         console.error('❌ No Response:', error.request); // No response from server
-//         alert('❌ Network Error: Please check your internet connection or try again later.');
-//       } else {
-//         console.error('❌ Unexpected Error:', error.message); // Any other errors (like axios setup issues)
-//         alert('❌ An error occurred during login. Please try again.');
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className="p-8">
-//       <h2 className="mb-4 font-bold text-2xl">Login</h2>
-//       <form onSubmit={handleLogin}>
-//         <input
-//           type="email"
-//           name="email"
-//           placeholder="Email"
-//           value={formData.email}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="Password"
-//           value={formData.password}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <button 
-//           type="submit" 
-//           className="bg-blue-500 px-4 py-2 rounded text-white">
-//           Login
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default Login;
-
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
-
-// const Login = () => {
-//   const [formData, setFormData] = useState({
-//     email: '',
-//     password: '',
-//   });
-//   const navigate = useNavigate(); // Hook to navigate after successful login
-
-//   // Handle input change
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   // Handle form submission for login
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-
-//     // Simple validation: Ensure both fields are filled
-//     if (!formData.email || !formData.password) {
-//       alert('⚠️ Please fill in both fields.');
-//       return;
-//     }
-
-//     try {
-//       // Make the API request
-//       const response = await axios.post(
-//         `${import.meta.env.VITE_API_BASE_URL}/login`,  // Ensure the API base URL is correctly set
-//         formData,
-//         {
-//           headers: {
-//             'Content-Type': 'application/json',  // Ensure the correct content type is set
-//           },
-//         }
-//       );
-
-//       alert('✅ Login successful!');
-//       console.log('Login Response:', response.data);
-
-//       // Check if the token is returned in the response and store it
-//       if (response.data.token) {
-//         localStorage.setItem('authToken', response.data.token); // Store the token in localStorage
-//       }
-
-//       // Redirect the user to the dashboard or a protected route
-//       navigate('/dashboard');  // Replace '/dashboard' with your protected route
-
-//     } catch (error) {
-//       console.error('❌ Error logging in:', error);
-
-//       // Handle different error scenarios
-//       if (error.response) {
-//         // Server responded with a status code other than 2xx
-//         alert(`⚠️ ${error.response.data.message || 'Login failed. Please try again.'}`);
-//       } else if (error.request) {
-//         // No response was received from the server
-//         alert('❌ Network Error: Please check your internet connection or try again later.');
-//       } else {
-//         // Other errors, like issues with setting up the request
-//         alert('❌ An error occurred during login. Please try again.');
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className="p-8">
-//       <h2 className="mb-4 font-bold text-2xl">Login</h2>
-//       <form onSubmit={handleLogin}>
-//         <input
-//           type="email"
-//           name="email"
-//           placeholder="Email"
-//           value={formData.email}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="Password"
-//           value={formData.password}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <button type="submit" className="bg-blue-500 px-4 py-2 rounded text-white">
-//           Login
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default Login;
-
-// import React, { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom'; // Import the useNavigate hook
-
-// const Login = () => {
-//   const [formData, setFormData] = useState({
-//     email: '',
-//     password: '',
-//   });
-//   const navigate = useNavigate(); // Hook to navigate after successful login
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleLogin = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const response = await axios.post(
-//         `${import.meta.env.VITE_API_BASE_URL}/login`, 
-//         formData, 
-//         {
-//           headers: {
-//             'Content-Type': 'application/json',  // Ensure correct content type
-//           },
-//         }
-//       );
-//       alert('✅ Login successful!');
-//       console.log('Login Response:', response.data);
-
-//       // Save the token (if you have one) to localStorage or context
-//       localStorage.setItem('authToken', response.data.token); // Example of saving the token
-
-//       // Redirect the user to the dashboard or a protected page
-//       navigate('/dashboard'); // Replace '/dashboard' with your protected route
-//     } catch (error) {
-//       console.error('❌ Error logging in:', error);
-
-//       // Check for specific error response or network issues
-//       if (error.response) {
-//         // The request was made and the server responded with a status code
-//         alert(`⚠️ ${error.response.data.message || 'Login failed. Please try again.'}`);
-//       } else if (error.request) {
-//         // The request was made but no response was received
-//         alert('❌ Network Error: Please check your internet connection or try again later.');
-//       } else {
-//         // Something went wrong with the request setup
-//         alert('❌ An error occurred during login. Please try again.');
-//       }
-//     }
-//   };
-
-//   return (
-//     <div className="p-8">
-//       <h2 className="mb-4 font-bold text-2xl">Login</h2>
-//       <form onSubmit={handleLogin}>
-//         <input
-//           type="email"
-//           name="email"
-//           placeholder="Email"
-//           value={formData.email}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="Password"
-//           value={formData.password}
-//           onChange={handleChange}
-//           className="mb-4 p-2 border w-full"
-//         />
-//         <button type="submit" className="bg-blue-500 px-4 py-2 rounded text-white">
-//           Login
-//         </button>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default Login;
 
