@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import AppointmentBooking from './pages/AppointmentBooking';
 import Chat from './pages/Chat';
 import VideoCall from './pages/VideoCall';
-import Email from './Pages/Email';
+import Email from './Pages/E mail';
 import Payment from './pages/Pay';
 import DoctorAdvice from './pages/DoctorAdvice'; // Import DoctorAdvice page
 import Navbar from './components/Navbar';
@@ -27,7 +27,7 @@ const App = () => {
           <Route path="/book-appointment" element={<AppointmentBooking />} />
           <Route path="/chat" element={<Chat />} /> {/* Chat Functionality */}
           <Route path="/video-call" element={<VideoCall />} /> {/* Zoom Video Call Integration */}
-          <Route path="/email" element={<Email />} /> {/* Email Sending Form */}
+          <Route path="/Email" element={<Email />} /> {/* Email Sending Form */}
           <Route path="/payment" element={<Payment />} /> {/* Payment with PayPal */}
           <Route path="/doctor-advice" element={<DoctorAdvice />} /> {/* Doctor Advice Page */}
         </Routes>
