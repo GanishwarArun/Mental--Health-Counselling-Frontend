@@ -7,7 +7,7 @@ import Dashboard from './pages/Dashboard';
 import AppointmentBooking from './pages/AppointmentBooking';
 import Chat from './pages/Chat';
 import VideoCall from './pages/VideoCall';
-import Email from './Pages/E mail';
+import Email from './Pages/Email';
 import Payment from './pages/Pay';
 import DoctorAdvice from './pages/DoctorAdvice'; // Import DoctorAdvice page
 import Navbar from './components/Navbar';
