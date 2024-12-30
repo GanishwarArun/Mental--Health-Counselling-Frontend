@@ -1,172 +1,274 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const AppointmentBooking = () => {
-  const [appointmentDetails, setAppointmentDetails] = useState({
-    date: '',
-    time: '',
-    counselor: '',
-  });
-
+const Appointments = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [newAppointment, setNewAppointment] = useState({ date: '', time: '', counselor: '' });
   const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
-  const [clientRecords, setClientRecords] = useState([]); // Store booked appointments
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  // Handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAppointmentDetails({
-      ...appointmentDetails,
-      [name]: value,
-    });
-  };
+  // Fetch all appointments
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/appointments`);
+        setAppointments(response.data);
+      } catch (error) {
+        setError('Error fetching appointments. Please try again later.');
+      }
+    };
+    fetchAppointments();
+  }, []);
 
-  // Handle form submit
-  const handleSubmit = (e) => {
+  // Handle creating a new appointment
+  const handleCreate = async (e) => {
     e.preventDefault();
-    const { date, time, counselor } = appointmentDetails;
-
-    if (!date || !time || !counselor) {
-      setMessageType('error');
-      setMessage('⚠️ All fields are required!');
-      return;
+    setMessage('');
+    setError('');
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/appointments`, newAppointment);
+      setAppointments([...appointments, response.data]);
+      setMessage('Appointment created successfully!');
+      setNewAppointment({ date: '', time: '', counselor: '' });
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to create appointment');
     }
-
-    const appointmentTime = new Date(`${date}T${time}`);
-    if (appointmentTime < new Date()) {
-      setMessageType('error');
-      setMessage('⚠️ Appointment time must be in the future!');
-      return;
-    }
-
-    // Add new appointment to client records
-    setClientRecords((prevRecords) => [
-      ...prevRecords,
-      { ...appointmentDetails, id: Date.now(), status: 'Upcoming' }, // Add a unique ID and status
-    ]);
-
-    setMessageType('success');
-    setMessage('✅ Appointment booked successfully!');
-
-    // Reset form
-    setAppointmentDetails({ date: '', time: '', counselor: '' });
   };
 
-  // Handle appointment cancellation
-  const handleCancelAppointment = (id) => {
-    const updatedRecords = clientRecords.map((record) =>
-      record.id === id ? { ...record, status: 'Cancelled' } : record
-    );
-    setClientRecords(updatedRecords);
-    setMessageType('success');
-    setMessage('🗑️ Appointment cancelled successfully.');
+  // Handle canceling an appointment
+  const handleCancel = async (id) => {
+    setMessage('');
+    setError('');
+    try {
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/appointments/cancel/${id}`);
+      setAppointments(appointments.filter((appointment) => appointment._id !== id));
+      setMessage('Appointment canceled successfully!');
+    } catch (error) {
+      setError(error.response?.data?.message || 'Failed to cancel appointment');
+    }
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-8 min-h-screen">
-      <h1 className="drop-shadow-md mb-8 font-extrabold text-4xl text-center text-white">📅 Book an Appointment</h1>
+    <div className="bg-gray-100 p-8 min-h-screen">
+      <div className="bg-white shadow-lg mx-auto p-6 rounded-lg max-w-4xl">
+        <h2 className="mb-6 font-bold text-2xl text-gray-800">Manage Appointments</h2>
 
-      {/* Booking Form */}
-      <div className="bg-white shadow-2xl mx-auto p-10 rounded-xl max-w-xl">
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label className="block font-semibold text-gray-700" htmlFor="date">Date</label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={appointmentDetails.date}
-              onChange={handleChange}
-              className="mt-2 p-3 border rounded-md focus:ring-2 focus:ring-blue-500 w-full"
-            />
+        {/* Message Display */}
+        {message && <p className="mb-4 font-medium text-green-600">{message}</p>}
+        {error && <p className="mb-4 font-medium text-red-600">{error}</p>}
+
+        {/* Form to Create Appointment */}
+        <form onSubmit={handleCreate} className="mb-6">
+          <div className="gap-4 grid grid-cols-1 sm:grid-cols-3">
+            <div>
+              <label htmlFor="date" className="block font-medium text-gray-700">Date</label>
+              <input
+                type="date"
+                id="date"
+                className="border-gray-300 p-2 border rounded-lg w-full"
+                value={newAppointment.date}
+                onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="time" className="block font-medium text-gray-700">Time</label>
+              <input
+                type="time"
+                id="time"
+                className="border-gray-300 p-2 border rounded-lg w-full"
+                value={newAppointment.time}
+                onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="counselor" className="block font-medium text-gray-700">Counselor</label>
+              <input
+                type="text"
+                id="counselor"
+                className="border-gray-300 p-2 border rounded-lg w-full"
+                value={newAppointment.counselor}
+                onChange={(e) => setNewAppointment({ ...newAppointment, counselor: e.target.value })}
+                required
+              />
+            </div>
           </div>
-
-          <div className="mb-6">
-            <label className="block font-semibold text-gray-700" htmlFor="time">Time</label>
-            <input
-              type="time"
-              id="time"
-              name="time"
-              value={appointmentDetails.time}
-              onChange={handleChange}
-              className="mt-2 p-3 border rounded-md focus:ring-2 focus:ring-blue-500 w-full"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block font-semibold text-gray-700" htmlFor="counselor">Counselor</label>
-            <input
-              type="text"
-              id="counselor"
-              name="counselor"
-              value={appointmentDetails.counselor}
-              onChange={handleChange}
-              placeholder="Enter counselor's name"
-              className="mt-2 p-3 border rounded-md focus:ring-2 focus:ring-blue-500 w-full"
-            />
-          </div>
-
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg w-full font-bold text-white transition-all"
+            className="bg-blue-600 hover:bg-blue-700 mt-4 px-4 py-2 rounded-lg font-medium text-white transition"
           >
-            Book Appointment
+            Create Appointment
           </button>
         </form>
 
-        {message && (
-          <p
-            className={`mt-6 p-4 text-center rounded-md ${
-              messageType === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}
-          >
-            {message}
-          </p>
+        {/* Appointments List */}
+        <h3 className="mb-4 font-semibold text-gray-800 text-xl">Upcoming Appointments</h3>
+        {appointments.length > 0 ? (
+          <ul className="space-y-4">
+            {appointments.map((appointment) => (
+              <li key={appointment._id} className="flex justify-between items-center border-gray-200 bg-gray-50 p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-800">{appointment.date} at {appointment.time}</p>
+                  <p className="text-gray-600 text-sm">Counselor: {appointment.counselor}</p>
+                </div>
+                <button
+                  onClick={() => handleCancel(appointment._id)}
+                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg font-medium text-white transition"
+                >
+                  Cancel
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-600">No appointments scheduled.</p>
         )}
+
+        {/* Navigation Button */}
+        <button
+          onClick={() => navigate('/chat')}
+          className="bg-gray-800 hover:bg-gray-900 mt-6 px-4 py-2 rounded-lg font-medium text-white transition"
+        >
+         GO TO CHAT
+        </button>
       </div>
-
-      {/* Client Records Section */}
-      <h2 className="drop-shadow-md mt-12 mb-6 font-bold text-3xl text-center text-white">📋 Client Records</h2>
-
-      {clientRecords.length > 0 ? (
-        <div className="mx-auto max-w-5xl">
-          <table className="bg-white shadow-2xl rounded-lg w-full">
-            <thead>
-              <tr className="bg-blue-600 text-left text-white">
-                <th className="p-4">Date</th>
-                <th className="p-4">Time</th>
-                <th className="p-4">Counselor</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientRecords.map((record) => (
-                <tr key={record.id} className="hover:bg-gray-50 border-t">
-                  <td className="p-4">{record.date}</td>
-                  <td className="p-4">{record.time}</td>
-                  <td className="p-4">{record.counselor}</td>
-                  <td className={`p-4 font-bold ${record.status === 'Cancelled' ? 'text-red-600' : 'text-blue-600'}`}>{record.status}</td>
-                  <td className="p-4">
-                    {record.status !== 'Cancelled' && (
-                      <button
-                        onClick={() => handleCancelAppointment(record.id)}
-                        className="bg-red-500 hover:bg-red-600 px-4 py-1 rounded text-white"
-                      >
-                        Cancel
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p className="mt-4 text-center text-white">No appointments booked yet.</p>
-      )}
     </div>
   );
 };
 
-export default AppointmentBooking;
+export default Appointments;
+
+
+
+// // src/pages/Appointments.jsx
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import { useNavigate } from 'react-router-dom';
+
+// const Appointments = () => {
+//   const [appointments, setAppointments] = useState([]);
+//   const [newAppointment, setNewAppointment] = useState({ date: '', time: '' });
+//   const [message, setMessage] = useState('');
+//   const navigate = useNavigate();
+
+//   // Fetch all appointments
+//   useEffect(() => {
+//     const fetchAppointments = async () => {
+//       try {
+//         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/appointments`);
+//         setAppointments(response.data);
+//       } catch (error) {
+//         console.error('Error fetching appointments:', error);
+//       }
+//     };
+//     fetchAppointments();
+//   }, []);
+
+//   // Handle creating a new appointment
+//   const handleCreate = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/appointments`, newAppointment);
+//       setAppointments([...appointments, response.data]);
+//       setMessage('Appointment created successfully!');
+//       setNewAppointment({ date: '', time: '' });
+//     } catch (error) {
+//       setMessage(error.response?.data?.message || 'Failed to create appointment');
+//     }
+//   };
+
+//   // Handle canceling an appointment
+//   const handleCancel = async (id) => {
+//     try {
+//       await axios.put(`${import.meta.env.VITE_API_BASE_URL}/appointments/cancel/${id}`);
+//       setAppointments(appointments.filter((appointment) => appointment.id !== id));
+//       setMessage('Appointment canceled successfully!');
+//     } catch (error) {
+//       setMessage(error.response?.data?.message || 'Failed to cancel appointment');
+//     }
+//   };
+
+//   return (
+//     <div className="bg-gray-100 p-8 min-h-screen">
+//       <div className="bg-white shadow-lg mx-auto p-6 rounded-lg max-w-4xl">
+//         <h2 className="mb-6 font-bold text-2xl text-gray-800">Manage Appointments</h2>
+
+//         {/* Message Display */}
+//         {message && <p className="mb-4 font-medium text-green-600">{message}</p>}
+
+//         {/* Form to Create Appointment */}
+//         <form onSubmit={handleCreate} className="mb-6">
+//           <div className="gap-4 grid grid-cols-1 sm:grid-cols-2">
+//             <div>
+//               <label htmlFor="date" className="block font-medium text-gray-700">Date</label>
+//               <input
+//                 type="date"
+//                 id="date"
+//                 className="border-gray-300 p-2 border rounded-lg w-full"
+//                 value={newAppointment.date}
+//                 onChange={(e) => setNewAppointment({ ...newAppointment, date: e.target.value })}
+//                 required
+//               />
+//             </div>
+
+//             <div>
+//               <label htmlFor="time" className="block font-medium text-gray-700">Time</label>
+//               <input
+//                 type="time"
+//                 id="time"
+//                 className="border-gray-300 p-2 border rounded-lg w-full"
+//                 value={newAppointment.time}
+//                 onChange={(e) => setNewAppointment({ ...newAppointment, time: e.target.value })}
+//                 required
+//               />
+//             </div>
+//           </div>
+//           <button
+//             type="submit"
+//             className="bg-blue-600 hover:bg-blue-700 mt-4 px-4 py-2 rounded-lg font-medium text-white transition"
+//           >
+//             Create Appointment
+//           </button>
+//         </form>
+
+//         {/* Appointments List */}
+//         <h3 className="mb-4 font-semibold text-gray-800 text-xl">Upcoming Appointments</h3>
+//         {appointments.length > 0 ? (
+//           <ul className="space-y-4">
+//             {appointments.map((appointment) => (
+//               <li key={appointment.id} className="flex justify-between items-center border-gray-200 bg-gray-50 p-4 border rounded-lg">
+//                 <div>
+//                   <p className="font-medium text-gray-800">{appointment.date} at {appointment.time}</p>
+//                 </div>
+//                 <button
+//                   onClick={() => handleCancel(appointment.id)}
+//                   className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg font-medium text-white transition"
+//                 >
+//                   Cancel
+//                 </button>
+//               </li>
+//             ))}
+//           </ul>
+//         ) : (
+//           <p className="text-gray-600">No appointments scheduled.</p>
+//         )}
+
+//         {/* Navigation Button */}
+//         <button
+//           onClick={() => navigate('/')}
+//           className="bg-gray-800 hover:bg-gray-900 mt-6 px-4 py-2 rounded-lg font-medium text-white transition"
+//         >
+//           Back to Home
+//         </button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Appointments;
 

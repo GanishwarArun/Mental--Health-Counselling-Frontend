@@ -50,7 +50,7 @@ const Navbar = () => {
             <Link to="/chat" className="font-semibold text-lg">Chat</Link>
           </li>
           <li className="p-2 md:p-0 transition-transform hover:scale-110">
-            <Link to="/video-call" className="font-semibold text-lg">Video Call</Link>
+            <Link to="/Zoom Meeting" className="font-semibold text-lg">Zoom Meeting</Link>
           </li>
           <li className="p-2 md:p-0 transition-transform hover:scale-110">
             <Link to="/email" className="font-semibold text-lg">Email</Link>
@@ -59,7 +59,7 @@ const Navbar = () => {
             <Link to="/doctor-advice" className="font-semibold text-lg">Doctor Advice</Link> 
           </li>
           <li className="p-2 md:p-0 transition-transform hover:scale-110">
-            <Link to="/payment" className="font-semibold text-lg">Payment</Link>
+            <Link to="/paypal" className="font-semibold text-lg">Paypal</Link>
           </li>
         </ul>
       </div>
